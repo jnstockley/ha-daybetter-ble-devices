@@ -1,61 +1,28 @@
-# Contribution guidelines
+# Contributing
 
-Contributing to this project should be as easy and transparent as possible, whether it's:
+Use Python 3.14. Run `scripts/setup`, then the validation commands in the
+[README](README.md#validation). For live macOS Bluetooth testing, follow the
+[local development instructions](README.md#native-macos-development).
 
-- Reporting a bug
-- Discussing the current state of the code
-- Submitting a fix
-- Proposing new features
+Create a branch from `main`, add regression tests for changed behavior, update
+documentation, and open a pull request against
+[jnstockley/ha-daybetter-ble-devices](https://github.com/jnstockley/ha-daybetter-ble-devices/pulls).
+Describe the problem, resulting behavior, tests run, and any hardware limitations.
+Keep the `daybetter_led` domain and existing entity IDs stable. Use HA's Bluetooth
+manager instead of starting a separate scanner. Preserve cancellation and clean
+up pending tasks and connections on setup failure, unload, and shutdown.
 
-## Github is used for everything
+Use Ruff for formatting and linting; `scripts/lint` checks without modifying files.
+To format, run `.venv-ha/bin/ruff format custom_components scripts tests`.
+Tests must run without hardware; mock radio boundaries rather than HA itself when
+possible. Device tests should record model, firmware, HA version and Bluetooth
+adapter/proxy. Redact identifying logs and keep `.ha-dev` private.
 
-Github is used to host code, to track issues and feature requests, as well as accept pull requests.
+Dependency changes must update the manifest pin and installation documentation.
+Release tags must match the integration version prefixed by `v`; CI publishes a
+prerelease for alpha, beta and RC versions. See the README release checklist.
 
-Pull requests are the best way to propose changes to the codebase.
-
-1. Fork the repo and create your branch from `main`.
-2. If you've changed something, update the documentation.
-3. Make sure your code lints (using `scripts/lint`).
-4. Test you contribution.
-5. Issue that pull request!
-
-## Any contributions you make will be under the MIT Software License
-
-In short, when you submit code changes, your submissions are understood to be under the same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the maintainers if that's a concern.
-
-## Report bugs using Github's [issues](../../issues)
-
-GitHub issues are used to track public bugs.
-Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
-
-## Write bug reports with detail, background, and sample code
-
-**Great Bug Reports** tend to have:
-
-- A quick summary and/or background
-- Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
-- What you expected would happen
-- What actually happens
-- Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
-
-People *love* thorough bug reports. I'm not even kidding.
-
-## Use a Consistent Coding Style
-
-Use [black](https://github.com/ambv/black) to make sure the code follows the style.
-
-## Test your code modification
-
-This custom component is based on [integration_blueprint template](https://github.com/ludeeus/integration_blueprint).
-
-It comes with development environment in a container, easy to launch
-if you use Visual Studio Code. With this container you will have a stand alone
-Home Assistant instance running and already configured with the included
-[`configuration.yaml`](./config/configuration.yaml)
-file.
-
-## License
-
-By contributing, you agree that your contributions will be licensed under its MIT License.
+Report reproducible bugs through the
+[issue templates](https://github.com/jnstockley/ha-daybetter-ble-devices/issues/new/choose).
+Contributions are licensed under the repository's [MIT License](LICENSE), including
+the retained original copyright notice.

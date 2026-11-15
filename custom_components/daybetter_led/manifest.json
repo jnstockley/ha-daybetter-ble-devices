@@ -3,21 +3,30 @@
   "name": "Daybetter LED Strip",
   "bluetooth": [
     {
-      "service_uuid": "0000c031-0000-1000-8000-00805f9b34fb"
+      "service_uuid": "0000c031-0000-1000-8000-00805f9b34fb",
+      "connectable": true
+    },
+    {
+      "service_uuid": "0000c065-0000-1000-8000-00805f9b34fb",
+      "connectable": true
     }
   ],
   "codeowners": [
-    "@grimsteel"
+    "@jnstockley"
   ],
   "config_flow": true,
   "dependencies": [
     "bluetooth_adapters"
   ],
-  "documentation": "https://github.com/grimsteel/homeassistant-daybetter-led-strip",
-  "iot_class": "assumed_state",
-  "issue_tracker": "https://github.com/grimsteel/homeassistant-daybetter-led-strip/issues",
-  "requirements": [
-    "daybetter-led-strip>=0.3.0"
+  "documentation": "https://github.com/jnstockley/ha-daybetter-ble-devices",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/jnstockley/ha-daybetter-ble-devices/issues",
+  "loggers": [
+    "daybetter_ble_client"
   ],
-  "version": "0.1.0"
+  "requirements": [
+    "daybetter-ble-client==1.0.0rc3"
+  ],
+  "version": "1.0.0b1"
 }

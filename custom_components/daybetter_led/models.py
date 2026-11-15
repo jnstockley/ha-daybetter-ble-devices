@@ -6,10 +6,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from daybetter_led_strip import DaybetterLedStrip
+    from daybetter_ble_client import DaybetterLedStrip
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.loader import Integration
 
+    from .connection import DaybetterConnection
     from .coordinator import (
         DaybetterLedStripCoordinator,
     )
@@ -24,6 +25,7 @@ class DaybetterLedStripData:
     device: DaybetterLedStrip
     coordinator: DaybetterLedStripCoordinator
     integration: Integration
+    connection: DaybetterConnection
 
 
 @dataclass

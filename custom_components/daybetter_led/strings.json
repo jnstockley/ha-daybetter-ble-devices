@@ -1,73 +1,76 @@
 {
-    "config": {
-        "step": {
-            "user": {
-                "description": "Select your Daybetter LED Strip",
-                "data": {
-                    "address": "LED Strip Bluetooth MAC Address"
-                }
-            }
-        },
-        "error": {
-            "unknown": "Unknown error occurred."
-        },
-        "abort": {
-            "already_configured": "This entry is already configured."
+  "config": {
+    "step": {
+      "user": {
+        "description": "Select your Daybetter LED Strip",
+        "data": {
+          "address": "Bluetooth address"
         }
+      }
     },
-    "options": {
-        "step": {
-            "init": {
-                "description": "Color correction reduces the intensity of the green and blue LEDs and applies a gamma scaling function. This results in more accurate colors.",
-                "data": {
-                    "color_correction": "Enable color correction"
-                }
-            }
-        }
+    "error": {
+      "unknown": "Unknown error occurred.",
+      "device_unavailable": "This device is no longer available. Select a discovered device."
     },
-    "entity": {
-        "sensor": {
-            "bluetooth_rssi": {
-                "name": "Bluetooth RSSI"
-            },
-            "mac_address": {
-                "name": "MAC Address"
-            }
-        },
-        "light": {
-            "rgb_lights": {
-                "name": "RGB Lights",
-                "state_attributes": {
-                    "effect": {
-                        "state": {
-                            "switch_rgb": "Switch RGB",
-                            "switch_all": "Switch All",
-                            "fade_fast": "Fade Fast",
-                            "fade_slow": "Fade Slow",
-                            "blink_red": "Blink Red",
-                            "blink_green": "Blink Green",
-                            "blink_blue": "Blink Blue",
-                            "blink_yellow": "Blink Yellow",
-                            "blink_teal": "Blink Teal",
-                            "blink_purple": "Blink Purple",
-                            "blink_white": "Blink White",
-                            "fade_red_green": "Fade Red Green",
-                            "fade_red_blue": "Fade Red Blue",
-                            "fade_green_blue": "Fade Green Blue",
-                            "flash_all": "Flash All",
-                            "flash_red": "Flash Red",
-                            "flash_green": "Flash Green",
-                            "flash_blue": "Flash Blue",
-                            "flash_yellow": "Flash Yellow",
-                            "flash_teal": "Flash Teal",
-                            "flash_purple": "Flash Purple",
-                            "flash_white": "Flash White",
-                            "strobe_rgb": "Strobe RGB",
-                            "strobe_all": "Strobe All"
-                        }
-                    }
-                }
-            }
-        }
+    "abort": {
+      "already_configured": "This entry is already configured.",
+      "no_devices_found": "No supported connectable Daybetter devices found.",
+      "not_supported": "This device is not a supported connectable Daybetter strip."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Color correction reduces the intensity of the green and blue LEDs and applies a gamma scaling function. This results in more accurate colors.",
+        "data": {
+          "color_correction": "Enable color correction"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "bluetooth_rssi": {
+        "name": "Bluetooth RSSI"
+      },
+      "mac_address": {
+        "name": "Bluetooth address"
+      }
+    },
+    "light": {
+      "rgb_lights": {
+        "name": "RGB Lights",
+        "state_attributes": {
+          "effect": {
+            "state": {
+              "switch_rgb": "Switch RGB",
+              "switch_all": "Switch All",
+              "fade_fast": "Fade Fast",
+              "fade_slow": "Fade Slow",
+              "blink_red": "Blink Red",
+              "blink_green": "Blink Green",
+              "blink_blue": "Blink Blue",
+              "blink_yellow": "Blink Yellow",
+              "blink_teal": "Blink Teal",
+              "blink_purple": "Blink Purple",
+              "blink_white": "Blink White",
+              "fade_red_green": "Fade Red Green",
+              "fade_red_blue": "Fade Red Blue",
+              "fade_green_blue": "Fade Green Blue",
+              "flash_all": "Flash All",
+              "flash_red": "Flash Red",
+              "flash_green": "Flash Green",
+              "flash_blue": "Flash Blue",
+              "flash_yellow": "Flash Yellow",
+              "flash_teal": "Flash Teal",
+              "flash_purple": "Flash Purple",
+              "flash_white": "Flash White",
+              "strobe_rgb": "Strobe RGB",
+              "strobe_all": "Strobe All"
+            }
+          }
+        }
+      }
+    }
+  }
 }

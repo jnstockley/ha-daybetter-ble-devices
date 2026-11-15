@@ -1,17 +1,17 @@
 """
-Custom integration to integrate daybetter_led_strip with Home Assistant.
+Custom integration to integrate daybetter_ble_client with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/grimsteel/daybetter_led_strip
+https://github.com/jnstockley/ha-daybetter-ble-devices
 """
 
 from __future__ import annotations
 
 import logging
-import traceback
 from typing import TYPE_CHECKING
 
-from daybetter_led_strip import DaybetterLedStrip
+from bleak.exc import BleakError
+from daybetter_ble_client import DaybetterLedStrip
 from homeassistant.components import bluetooth
 from homeassistant.components.bluetooth.match import ADDRESS, BluetoothCallbackMatcher
 from homeassistant.const import (
@@ -20,8 +20,10 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import callback
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.loader import async_get_loaded_integration
 
+from .connection import DaybetterConnection
 from .const import DOMAIN
 from .coordinator import DaybetterLedStripCoordinator
 from .models import DaybetterLedStripData
@@ -48,11 +50,22 @@ async def async_setup_entry(
     address: str = entry.data[CONF_ADDRESS]
 
     led_strip = DaybetterLedStrip(address)
+    connection = DaybetterConnection(led_strip)
 
     # It's fine if the device isn't available right now
     ble_device = bluetooth.async_last_service_info(
         hass, address.upper(), connectable=True
     )
+
+    async def _async_reconnect(
+        service_info: bluetooth.BluetoothServiceInfoBleak,
+    ) -> None:
+        try:
+            await connection.async_update(service_info)
+        except BleakError, TimeoutError:
+            _LOGGER.warning(
+                "Daybetter reconnect failed; waiting for another advertisement"
+            )
 
     @callback
     def _async_update_ble(
@@ -60,11 +73,30 @@ async def async_setup_entry(
         _change: bluetooth.BluetoothChange,
     ) -> None:
         """Update from a ble callback."""
-        entry.async_create_task(
-            hass,
-            led_strip.update_device(service_info.device, service_info.advertisement),
+        coordinator.async_update_rssi(service_info.rssi)
+        entry.async_create_background_task(
+            hass, _async_reconnect(service_info), "Daybetter reconnect"
         )
 
+    coordinator = DaybetterLedStripCoordinator(
+        hass=hass, logger=_LOGGER, name=DOMAIN, config_entry=entry
+    )
+    entry.runtime_data = DaybetterLedStripData(
+        device=led_strip,
+        integration=async_get_loaded_integration(hass, entry.domain),
+        coordinator=coordinator,
+        connection=connection,
+    )
+
+    @callback
+    def _on_strip_state_change() -> None:
+        coordinator.refresh_state()
+
+    # Listen for changes
+    entry.async_on_unload(led_strip.on_change(_on_strip_state_change))
+
+    # Seed availability before entities are created, even with no radio in range.
+    coordinator.refresh_state()
     entry.async_on_unload(
         bluetooth.async_register_callback(
             hass,
@@ -73,43 +105,24 @@ async def async_setup_entry(
             bluetooth.BluetoothScanningMode.PASSIVE,
         )
     )
-    coordinator = DaybetterLedStripCoordinator(
-        hass=hass, logger=_LOGGER, name=DOMAIN, config_entry=entry
-    )
-    entry.runtime_data = DaybetterLedStripData(
-        device=led_strip,
-        integration=async_get_loaded_integration(hass, entry.domain),
-        coordinator=coordinator,
-    )
+    try:
+        if ble_device is not None:
+            await connection.async_update(ble_device)
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    except BaseException as err:
+        await coordinator.async_shutdown()
+        await connection.async_close()
+        if isinstance(err, (BleakError, TimeoutError)):
+            raise ConfigEntryNotReady(
+                "Daybetter connection initialization failed"
+            ) from err
+        raise
 
-    @callback
-    def _on_strip_state_change() -> None:
-        try:
-            coordinator.refresh_state()
-        except Exception:
-            _LOGGER.exception(
-                "Error while refreshing state: %s", traceback.format_exc()
-            )
-            raise
-
-    # Listen for changes
-    entry.async_on_unload(led_strip.on_change(_on_strip_state_change))
-
-    # Attach device info
-    if ble_device is not None:
-        await led_strip.update_device(ble_device.device, ble_device.advertisement)
-    else:
-        # force refresh with no device
-        coordinator.refresh_state()
-
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-
-    @callback
     async def _async_stop(_event: Event) -> None:
-        """Disconnect device."""
-        await led_strip.disconnect()
+        """Disconnect device after pending connection work stops."""
+        await coordinator.async_shutdown()
+        await connection.async_close()
 
-    # Force disconnect when Home Assistant stops
     entry.async_on_unload(
         hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, _async_stop)
     )
@@ -122,6 +135,6 @@ async def async_unload_entry(
     entry: DaybetterLedStripConfigEntry,
 ) -> bool:
     """Handle removal of an entry."""
-    # disconnect
-    await entry.runtime_data.device.disconnect()
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        await entry.runtime_data.connection.async_close()
+    return unload_ok
