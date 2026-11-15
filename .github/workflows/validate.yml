@@ -1,32 +1,72 @@
 name: Validate
 
-on:
-  workflow_dispatch:
+'on':
   push:
-    branches:
-      - main
+    branches: [main]
+    tags: ["v*"]
   pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  hassfest: # https://developers.home-assistant.io/blog/2020/04/16/hassfest
-    name: Hassfest validation
+  python:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version: "3.14"
+      - name: Install tooling
+        run: python -m pip install -r requirements-test.txt
+      - name: Check Python style
+        run: |
+          ruff check custom_components scripts tests
+          ruff format --check custom_components scripts tests
+      - name: Check syntax
+        run: python -m compileall -q custom_components scripts tests
+      - name: Validate HACS release files and PyPI dependency
+        run: python scripts/check_release.py --install-requirement
+      - name: Test offline integration behavior
+        run: python -m pytest -q
+      - name: Check Home Assistant Bluetooth dependency compatibility
+        run: python scripts/check_release.py --check-ha-compatibility
+      - name: Check tag against integration version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: python scripts/check_release.py --tag "$GITHUB_REF_NAME"
 
-      - name: Run hassfest validation
-        uses: home-assistant/actions/hassfest@87c064c607f3c5cc673a24258d0c98d23033bfc3 # master
-
-  hacs: # https://github.com/hacs/action
-    name: HACS validation
+  hassfest:
     runs-on: ubuntu-latest
     steps:
-      - name: Run HACS validation
-        uses: hacs/action@d556e736723344f83838d08488c983a15381059a # 22.5.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
+
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@main
         with:
           category: integration
-          # Remove this 'ignore' key when you have added brand images for your integration to https://github.com/home-assistant/brands
-          ignore: brands
+
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [python, hassfest, hacs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Publish GitHub release for HACS
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists; skipping creation."
+            exit 0
+          fi
+          if [[ "$GITHUB_REF_NAME" =~ (a|b|rc)[0-9]+$ ]]; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes --prerelease
+          else
+            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes
+          fi

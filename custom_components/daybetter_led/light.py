@@ -1,4 +1,4 @@
-"""Sensor platform for daybetter_led_strip."""
+"""Light platform for daybetter_ble_client."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import logging
 import math
 from typing import TYPE_CHECKING
 
-from daybetter_led_strip.const import Effect
+from daybetter_ble_client.const import Effect
 from homeassistant.components.light import (
     ATTR_BRIGHTNESS,
     ATTR_EFFECT,
@@ -125,10 +125,15 @@ class DaybetterLedStripLight(DaybetterLedStripEntity, LightEntity):
         """Initialize the sensor class."""
         super().__init__(coordinator, entity_description.key)
         self.entity_description = entity_description
+        self._update_state()
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._attr_available = self.coordinator.data["connected"]
+        self._update_state()
+        self.async_write_ha_state()
+
+    def _update_state(self) -> None:
+        """Apply the current snapshot at creation and on subsequent updates."""
         if self.coordinator.data["brightness"] is not None:
             # scale brightness
             self._attr_brightness = value_to_brightness(
@@ -139,7 +144,6 @@ class DaybetterLedStripLight(DaybetterLedStripEntity, LightEntity):
         self._attr_rgb_color = self.coordinator.data["color"]
         self._attr_is_on = self.coordinator.data["on"]
         self._attr_effect = effect_to_effect_str(self.coordinator.data["effect"])
-        self.async_write_ha_state()
 
     async def async_turn_on(self, **kwargs) -> None:  # noqa: ANN003
         """Turn the light on with the given color configuration."""

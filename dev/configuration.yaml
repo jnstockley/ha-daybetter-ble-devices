@@ -1,0 +1,21 @@
+# Seed for a private native development instance; edit .ha-dev/configuration.yaml.
+homeassistant:
+  name: Daybetter BLE Development
+  time_zone: America/Chicago
+
+http:
+  server_host: 127.0.0.1
+  server_port: 8124
+
+# Deliberately omit default_config and automatic LAN proxy discovery.
+frontend:
+config:
+api:
+websocket_api:
+history:
+bluetooth:
+logger:
+  default: info
+  logs:
+    custom_components.daybetter_led: debug
+    daybetter_ble_client: debug

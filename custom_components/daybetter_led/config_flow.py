@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-from daybetter_led_strip.const import SERVICE_DISCOVERY
+from daybetter_ble_client.const import SUPPORTED_DISCOVERY_SERVICES
 from homeassistant.components.bluetooth import (
     BluetoothServiceInfoBleak,
     async_discovered_service_info,
@@ -35,6 +35,10 @@ class DaybetterLedStripConfigFlow(ConfigFlow, domain=DOMAIN):
         self, discovery_info: BluetoothServiceInfoBleak
     ) -> ConfigFlowResult:
         """Handle the bluetooth discovery step."""
+        if not discovery_info.connectable or not set(
+            service.lower() for service in discovery_info.service_uuids
+        ).intersection(SUPPORTED_DISCOVERY_SERVICES):
+            return self.async_abort(reason="not_supported")
         await self.async_set_unique_id(discovery_info.address)
         self._abort_if_unique_id_configured()
         self._discovery_info = discovery_info
@@ -49,6 +53,21 @@ class DaybetterLedStripConfigFlow(ConfigFlow, domain=DOMAIN):
         # user picked a device
         if user_input is not None:
             address = user_input[CONF_ADDRESS]
+            if address not in self._discovered_devices:
+                return self.async_show_form(
+                    step_id="user",
+                    data_schema=vol.Schema(
+                        {
+                            vol.Required(CONF_ADDRESS): vol.In(
+                                {
+                                    info.address: info.name
+                                    for info in self._discovered_devices.values()
+                                }
+                            )
+                        }
+                    ),
+                    errors={"base": "device_unavailable"},
+                )
             discovery_info = self._discovered_devices[address]
             local_name = discovery_info.name
             # use the address as unique id
@@ -69,13 +88,16 @@ class DaybetterLedStripConfigFlow(ConfigFlow, domain=DOMAIN):
             self._discovered_devices[discovery.address] = discovery
         else:
             current_addresses = self._async_current_ids(include_ignore=False)
-            for discovery in async_discovered_service_info(self.hass):
+            for discovery in async_discovered_service_info(self.hass, connectable=True):
                 if (
                     # filter out already configured devices
                     discovery.address in current_addresses
                     or discovery.address in self._discovered_devices
                     # make sure it's a Daybetter LED Strip
-                    or SERVICE_DISCOVERY not in discovery.service_uuids
+                    or not discovery.connectable
+                    or not {
+                        service.lower() for service in discovery.service_uuids
+                    }.intersection(SUPPORTED_DISCOVERY_SERVICES)
                 ):
                     continue
                 self._discovered_devices[discovery.address] = discovery

@@ -1,4 +1,4 @@
-"""BlueprintEntity class."""
+"""Common device identity and connection availability."""
 
 from __future__ import annotations
 
@@ -27,4 +27,13 @@ class DaybetterLedStripEntity(CoordinatorEntity[DaybetterLedStripCoordinator]):
         )
         self._attr_unique_id = (
             f"{self.coordinator.config_entry.runtime_data.device.address}_{key}"
+        )
+
+    @property
+    def available(self) -> bool:
+        """Require an established connection as well as a successful coordinator."""
+        return bool(
+            super().available
+            and self.coordinator.data
+            and self.coordinator.data["connected"]
         )

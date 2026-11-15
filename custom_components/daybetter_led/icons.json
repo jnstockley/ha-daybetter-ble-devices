@@ -1,0 +1,17 @@
+{
+  "entity": {
+    "light": {
+      "rgb_lights": {
+        "default": "mdi:led-strip-variant"
+      }
+    },
+    "sensor": {
+      "bluetooth_rssi": {
+        "default": "mdi:signal"
+      },
+      "mac_address": {
+        "default": "mdi:bluetooth"
+      }
+    }
+  }
+}

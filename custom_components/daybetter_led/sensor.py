@@ -1,4 +1,4 @@
-"""Sensor platform for daybetter_led_strip."""
+"""Sensor platform for daybetter_ble_client."""
 
 from __future__ import annotations
 
@@ -33,9 +33,11 @@ ENTITY_DESCRIPTIONS: tuple[tuple[SensorEntityDescription, UpdateFn], ...] = (
             native_unit_of_measurement="dBm",
             has_entity_name=True,
         ),
-        lambda sensor: sensor.coordinator.data["rssi"]
-        if sensor.coordinator.data is not None
-        else None,
+        lambda sensor: (
+            sensor.coordinator.data["rssi"]
+            if sensor.coordinator.data is not None
+            else None
+        ),
     ),
     (
         SensorEntityDescription(
@@ -85,7 +87,6 @@ class DaybetterLedStripSensor(DaybetterLedStripEntity, SensorEntity):
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        self._attr_available = self.coordinator.data["connected"]
         self._attr_native_value = self._update_fn(self)
         self.async_write_ha_state()
 

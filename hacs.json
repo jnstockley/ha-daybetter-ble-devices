@@ -1,5 +1,4 @@
 {
-    "name": "Daybetter LED Strip",
-    "homeassistant": "2025.2.4",
-    "hacs": "2.0.5"
+  "name": "Daybetter LED Strip",
+  "homeassistant": "2026.10.3"
 }
