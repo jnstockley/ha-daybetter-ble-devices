@@ -1,4 +1,4 @@
-homeassistant==2026.10.3
+homeassistant==2026.11.2
 aiousbwatcher==1.1.2
 serialx==1.11.0
 aiohasupervisor==0.6.0
