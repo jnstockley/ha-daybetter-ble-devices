@@ -3,7 +3,7 @@ aiousbwatcher>=1.1.1
 pyserial>=3.5
 aiohasupervisor>=0.3.1
 # HA 2025.8 pins aiodns 3.5, which uses the pycares 4.x API.
-pycares<5
+pycares<6
 pytest>=9.2.0
 pytest-asyncio>=1.5.0
 ruff>=0.17.5
