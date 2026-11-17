@@ -26,7 +26,7 @@
     "daybetter_ble_client"
   ],
   "requirements": [
-    "daybetter-ble-client==1.0.0rc3"
+    "daybetter-ble-client==1.0.0rc4"
   ],
   "version": "1.0.0b1"
 }
