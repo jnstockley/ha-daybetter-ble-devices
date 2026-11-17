@@ -95,7 +95,7 @@ def effect_str_to_effect(effect_str: str) -> Effect | None:
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
+    hass: HomeAssistant,
     entry: DaybetterLedStripConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
@@ -145,7 +145,7 @@ class DaybetterLedStripLight(DaybetterLedStripEntity, LightEntity):
         self._attr_is_on = self.coordinator.data["on"]
         self._attr_effect = effect_to_effect_str(self.coordinator.data["effect"])
 
-    async def async_turn_on(self, **kwargs) -> None:  # noqa: ANN003
+    async def async_turn_on(self, **kwargs) -> None:
         """Turn the light on with the given color configuration."""
         device = self.coordinator.config_entry.runtime_data.device
 

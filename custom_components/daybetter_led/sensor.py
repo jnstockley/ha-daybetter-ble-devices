@@ -53,7 +53,7 @@ ENTITY_DESCRIPTIONS: tuple[tuple[SensorEntityDescription, UpdateFn], ...] = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
+    hass: HomeAssistant,
     entry: DaybetterLedStripConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
