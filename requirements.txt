@@ -1,2 +1,0 @@
-# Native development and devcontainer compatibility entry point.
--r requirements-test.txt

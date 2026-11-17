@@ -35,9 +35,9 @@ class DaybetterLedStripConfigFlow(ConfigFlow, domain=DOMAIN):
         self, discovery_info: BluetoothServiceInfoBleak
     ) -> ConfigFlowResult:
         """Handle the bluetooth discovery step."""
-        if not discovery_info.connectable or not set(
+        if not discovery_info.connectable or not {
             service.lower() for service in discovery_info.service_uuids
-        ).intersection(SUPPORTED_DISCOVERY_SERVICES):
+        }.intersection(SUPPORTED_DISCOVERY_SERVICES):
             return self.async_abort(reason="not_supported")
         await self.async_set_unique_id(discovery_info.address)
         self._abort_if_unique_id_configured()

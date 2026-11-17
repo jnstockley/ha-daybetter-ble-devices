@@ -1,9 +1,9 @@
 # Daybetter BLE Devices for Home Assistant
 
 Local Bluetooth control of Daybetter **P031 and P065 RGB LED strips**, using
-[`daybetter-ble-client==1.0.0rc3`](https://github.com/jnstockley/daybetter-ble-client).
+[`daybetter-ble-client==1.0.0rc4`](https://github.com/jnstockley/daybetter-ble-client).
 No cloud account is needed. Home Assistant owns Bluetooth discovery and adapter
-routing. Integration version: **1.0.0b1**; requires **Home Assistant 2026.10.3+**.
+routing. Integration version: **1.0.0b1**; requires **Home Assistant 2025.8.0+**.
 
 ## Installation
 

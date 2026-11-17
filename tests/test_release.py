@@ -22,8 +22,12 @@ def release(tmp_path, monkeypatch):
     return tmp_path
 
 
-def test_matching_prerelease_tag_is_accepted(release):
-    assert check_release.validate("v1.0.0b1") == "1.0.0b1"
+def test_matching_tag_is_accepted(release):
+    manifest = json.loads(
+        (release / "custom_components/daybetter_led/manifest.json").read_text()
+    )
+    version = manifest["version"]
+    assert check_release.validate(f"v{version}") == version
 
 
 def test_mismatched_tag_is_rejected(release):

@@ -1,8 +1,10 @@
-homeassistant==2026.10.3
-aiousbwatcher==1.1.2
-serialx==1.11.0
-aiohasupervisor==0.6.0
-pytest==9.2.0
-pytest-asyncio==1.5.0
-ruff==0.17.5
-packaging==26.3
+homeassistant>=2025.8.0
+aiousbwatcher>=1.1.1
+pyserial>=3.5
+aiohasupervisor>=0.3.1
+# HA 2025.8 pins aiodns 3.5, which uses the pycares 4.x API.
+pycares<5
+pytest>=9.2.0
+pytest-asyncio>=1.5.0
+ruff>=0.17.5
+packaging>=26.3

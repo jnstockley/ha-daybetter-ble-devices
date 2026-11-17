@@ -62,7 +62,7 @@ async def async_setup_entry(
     ) -> None:
         try:
             await connection.async_update(service_info)
-        except BleakError, TimeoutError:
+        except (BleakError, TimeoutError):
             _LOGGER.warning(
                 "Daybetter reconnect failed; waiting for another advertisement"
             )
