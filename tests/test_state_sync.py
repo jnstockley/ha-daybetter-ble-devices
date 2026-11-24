@@ -1,4 +1,4 @@
-"""Exercise HA state synchronization using RC3 and a simulated GATT radio."""
+"""Exercise HA state synchronization using the client and a simulated GATT radio."""
 
 import asyncio
 import logging
@@ -13,6 +13,7 @@ from daybetter_ble_client.const import P031, P065
 from daybetter_ble_client.util import modbus
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from custom_components.daybetter_led.connection import DaybetterConnection
 from custom_components.daybetter_led.coordinator import DaybetterLedStripCoordinator
@@ -159,6 +160,30 @@ async def test_failed_poll_stays_failed_after_rssi_and_recovers_on_status(setup_
     await coordinator.async_refresh()
     assert coordinator.last_update_success
     assert coordinator.data["on"] is False
+
+
+async def test_client_disconnect_cause_is_logged_safely(setup_device, caplog):
+    coordinator, radio = await setup_device(P031)
+    device = coordinator.config_entry.runtime_data.device
+    cause = OSError("remote closed AA:BB:CC:DD:EE:FF; packet a1 10 11 01 14 ff 64")
+    started = asyncio.Event()
+
+    async def stall_write(*_args, **_kwargs):
+        started.set()
+        await asyncio.Event().wait()
+
+    radio.write_gatt_char = stall_write
+    refresh = asyncio.create_task(coordinator._async_update_data())
+    await started.wait()
+    with caplog.at_level(logging.WARNING, logger=__name__), pytest.raises(UpdateFailed):
+        device._on_disconnected(radio, cause)
+        assert "OSError: remote closed <redacted address>" in caplog.text
+        await refresh
+
+    assert "OSError: remote closed <redacted address>" in caplog.text
+    assert "<redacted data>" in caplog.text
+    assert "AA:BB:CC:DD:EE:FF" not in caplog.text
+    assert "a1 10 11 01 14 ff 64" not in caplog.text
 
 
 async def test_rssi_does_not_postpone_periodic_poll(setup_device):
