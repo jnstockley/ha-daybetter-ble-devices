@@ -1,15 +1,15 @@
 # Daybetter BLE Devices for Home Assistant
 
 Local Bluetooth control of Daybetter **P031 and P065 RGB LED strips**, using
-[`daybetter-ble-client==1.0.0rc4`](https://github.com/jnstockley/daybetter-ble-client).
+[`daybetter-ble-client==1.0.0rc5`](https://github.com/jnstockley/daybetter-led-strip).
 No cloud account is needed. Home Assistant owns Bluetooth discovery and adapter
-routing. Integration version: **1.0.0b1**; requires **Home Assistant 2025.8.0+**.
+routing. Integration version: **1.0.0b3**; requires **Home Assistant 2025.8.0+**.
 
 ## Installation
 
 1. In HACS (or Marketplace where available), open **Custom repositories**, add
    `https://github.com/jnstockley/ha-daybetter-ble-devices`, and select **Integration**.
-2. Download **Daybetter LED Strip**. Enable prereleases to select **1.0.0b1**,
+2. Download **Daybetter LED Strip**. Enable prereleases to select **1.0.0b3**,
    then restart Home Assistant.
 3. Open **Settings → Devices & services → Add integration → Daybetter LED Strip**.
    Select a discovered device; repeat for each strip. Bluetooth discovery also
@@ -47,7 +47,7 @@ The integration retains an active connection and reconnects on later
 advertisements after a disconnect. Repeated advertisements do not tear down a
 working connection, and overlapping connection attempts are coalesced.
 
-The RC3 client requests a validated status snapshot when connecting, after the
+The client requests a validated status snapshot when connecting, after the
 P065 handshake where applicable. Power, brightness, RGB color (in color mode), and
 supported effects are populated from that snapshot before initial setup completes.
 If the initial read times out, setup is retried rather than treating missing state
@@ -60,6 +60,9 @@ postpone status polling. A failed read marks entities unavailable; RSSI updates 
 command acknowledgements alone do not clear that failure. A subsequent successful
 read or validated status notification restores availability. Unload and shutdown
 cancel pending reads before disconnecting.
+Distinct transport failures are logged with their exception type and a sanitized
+message. Repeated failures with the same cause are condensed until a successful
+read. Propagated reconnect errors are logged with sanitized details as well.
 
 The phone app can interrupt HA's connection; close it to let HA reconnect and read
 a fresh snapshot. An acknowledged HA command may appear before the next observed
@@ -119,7 +122,8 @@ after changing either package; symlinks and editable installs do not hot-reload 
 
 The earlier RC1 smoke test served onboarding but exposed a PyObjC/CoreBluetooth
 exception during shutdown. Physical device connections and clean native shutdown
-still need verification with RC3; passing offline checks does not establish either.
+still need verification with the current client; passing offline checks does not
+establish either.
 
 Allow Bluetooth access for Terminal or your editor in **System Settings → Privacy
 & Security → Bluetooth**. A macOS `SIGKILL` on scanner startup can indicate missing
@@ -181,7 +185,7 @@ results. No new hardware verification is implied by this migration.
 
 1. Update the manifest version, client pin if applicable, and [CHANGELOG.md](CHANGELOG.md).
 2. Run validation and confirm the **Validate** workflow passes on the default branch.
-3. Push a matching tag, for example **`v1.0.0b1`**. CI requires all Python,
+3. Push a matching tag, for example **`v1.0.0b3`**. CI requires all Python,
    hassfest and HACS jobs to pass before publishing the GitHub Release. Alpha,
    beta and RC tags produce prereleases. No release ZIP is needed for this layout.
 

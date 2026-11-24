@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0b3 (unreleased)
+
+- Pin `daybetter-ble-client==1.0.0rc5` and validate its disconnect-cause API.
+- Preserve and log client disconnect causes, handle transport exceptions as
+  coordinator failures, and redact addresses and packet data from logs.
+- Log propagated reconnect errors while keeping reconnection advertisement-driven
+  through Home Assistant's Bluetooth routing.
+
 ## 1.0.0b1 (unreleased)
 
 - Support Home Assistant 2025.8.0 and Python 3.13 with the RC4 client's wider

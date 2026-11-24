@@ -134,7 +134,7 @@ def validate(tag: str | None = None, install_requirement: bool = False) -> str:
             [
                 sys.executable,
                 "-c",
-                "from daybetter_ble_client import DaybetterLedStrip; from daybetter_ble_client.const import Effect, SUPPORTED_DISCOVERY_SERVICES; assert len(SUPPORTED_DISCOVERY_SERVICES) == 2; assert all(hasattr(DaybetterLedStrip, method) for method in ('async_refresh_state', 'update_device', 'disconnect', 'on_change', 'set_color', 'set_brightness', 'set_effect', 'set_power'))",
+                "from daybetter_ble_client import DaybetterLedStrip; from daybetter_ble_client.const import Effect, SUPPORTED_DISCOVERY_SERVICES; assert len(SUPPORTED_DISCOVERY_SERVICES) == 2; assert all(hasattr(DaybetterLedStrip, method) for method in ('async_refresh_state', 'update_device', 'disconnect', 'on_change', 'set_color', 'set_brightness', 'set_effect', 'set_power')); assert hasattr(DaybetterLedStrip('00:00:00:00:00:00'), 'disconnect_reason')",
             ],
             check=True,
         )

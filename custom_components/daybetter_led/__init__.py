@@ -26,6 +26,7 @@ from homeassistant.loader import async_get_loaded_integration
 from .connection import DaybetterConnection
 from .const import DOMAIN
 from .coordinator import DaybetterLedStripCoordinator
+from .diagnostics import exception_summary
 from .models import DaybetterLedStripData
 
 if TYPE_CHECKING:
@@ -62,9 +63,10 @@ async def async_setup_entry(
     ) -> None:
         try:
             await connection.async_update(service_info)
-        except (BleakError, TimeoutError):
+        except Exception as err:  # noqa: BLE001 - client propagates platform causes
             _LOGGER.warning(
-                "Daybetter reconnect failed; waiting for another advertisement"
+                "Daybetter reconnect failed (%s); waiting for another advertisement",
+                exception_summary(err),
             )
 
     @callback
